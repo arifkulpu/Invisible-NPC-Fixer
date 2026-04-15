@@ -1,0 +1,27 @@
+# Build and cache
+build/
+out/
+bin/
+obj/
+x64/
+.vs/
+.vscode/
+
+# VCPKG
+vcpkg_installed/
+vcpkg/
+
+# Binaries
+*.dll
+*.pdb
+*.exe
+
+# Skyrim specific
+*.log
+*.ini
+
+# Local files
+npc ghost fix
+implementation_plan.md
+task.md
+walkthrough.md

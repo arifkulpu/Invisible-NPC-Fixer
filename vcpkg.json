@@ -1,0 +1,8 @@
+{
+  "name": "npcghostfix",
+  "version": "1.0.0",
+  "dependencies": [
+    "commonlibsse-ng"
+  ],
+  "builtin-baseline": "bb63f3b28ddf811581712d83a5a8317f474c5e6f"
+}
