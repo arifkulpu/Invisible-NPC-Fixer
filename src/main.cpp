@@ -1,5 +1,4 @@
 #include <SKSE/SKSE.h>
-#include <REL/Relocation.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include "VisibilityFixer.h"
 
@@ -38,19 +37,17 @@ namespace
     }
 }
 
-SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
-{
+SKSEPluginLoad(const SKSE::LoadInterface* skse) {
     InitializeLog();
-    SKSE::log::info("NpcGhostFix (1.6.1170) loading...");
+    SKSE::log::info("NpcGhostFix loading...");
 
-    SKSE::Init(a_skse);
+    SKSE::Init(skse);
 
     auto messaging = SKSE::GetMessagingInterface();
-    if (!messaging->RegisterListener(OnMessage)) {
+    if (!messaging || !messaging->RegisterListener(OnMessage)) {
         return false;
     }
 
-    SKSE::log::info("NpcGhostFix (1.6.1170) loaded.");
-
+    SKSE::log::info("NpcGhostFix loaded.");
     return true;
 }

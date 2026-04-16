@@ -29,7 +29,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 # Version definitions for 1.6.1170
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    SKSE_SUPPORT_AE
+    SKSE_SUPPORT_SSE
 )
 
 if(MSVC)
