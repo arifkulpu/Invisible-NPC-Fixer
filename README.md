@@ -1,46 +1,84 @@
-# Invisible-NPC-Fixer
+# Invisible NPC Fixer
 
-An SKSE plugin for Skyrim Special Edition & Anniversary Edition (1.5.97 - 1.6.1170+) that automatically detects and resolves "invisible NPC" and "naked NPC" glitches by forcing a 3D model refresh.
+> An SKSE plugin for Skyrim Special Edition & Anniversary Edition that automatically fixes the "ghost NPC" bug — NPCs that are present in the world but invisible or appear naked.
 
-## Features & Optimizations
-- **Smart Detection:** Detects NPCs in the active cell that have failed to render their 3D models.
-- **Engine-Safe Refresh:** Automatically triggers a 3D refresh (`Update3DModel`) to force the game engine to reload the actor. This is safely queued using the SKSE Task Interface to prevent mid-render CTDs (Crash to Desktop).
-- **High Performance:** 
-  - Uses `a_delta` frametime calculations instead of heavy OS clocks (`std::chrono`) for internal timers.
-  - Implements $O(1)$ Hash-Tables (`std::unordered_map`) for extremely fast memory tracking of already fixed NPCs.
-  - Limits distance checks (approx. 4096 units radius) to only process NPCs that are actually near the player, saving valuable CPU cycles.
-- **Stability Checks:** Ignores dead, disabled, or pending deletion (`IsDeleted`) actors to prevent engine instability and random crashes.
-- **Next-Gen Compatible:** Fully integrates `CommonLibSSE-NG` and `SKSEPluginLoad` architecture, providing seamless Address Library backwards/forwards compatibility across both 1.5.97 and 1.6.xx versions.
+**GitHub:** https://github.com/arifkulpu/Invisible-NPC-Fixer
 
-## Requirements
-- Skyrim Special Edition / Anniversary Edition 
+---
+
+## English
+
+### What it does
+
+- Scans NPCs near the player every few seconds and detects actors whose 3D node has failed to render (ghost NPCs).
+- Fixes affected NPCs by directly resetting the NiNode visibility flag (`SetAppCulled`). This operation only touches the render graph and **never modifies the actor's inventory or outfit**.
+- Skips actors that are currently inside an animation scene (OStim, OStim NG, SexLab, etc.) to avoid interfering with those frameworks.
+- Skips all followers — both vanilla followers (via `CurrentFollowerFaction`) and followers managed by Nether's Follower Framework (NFF), Amazing Follower Tweaks (AFT), and Enhanced Follower Framework (EFF).
+- Automatically pauses the scan whenever a menu is open (inventory, container, barter, etc.) — the engine temporarily unloads NPC 3D models during menu screens, and scanning at that moment would produce false positives.
+- All behavior can be configured via `NpcGhostFix.ini` in `Data/SKSE/Plugins/`. The mod works with default values even without the INI file.
+
+### Compatibility
+
+| Mod | Status |
+|---|---|
+| OStim / OStim NG / OSex | ✅ Compatible — actors in active scenes are skipped |
+| SexLab Framework | ✅ Compatible — actors in active scenes are skipped |
+| Nether's Follower Framework (NFF) | ✅ Compatible — managed followers are skipped |
+| Amazing Follower Tweaks (AFT) | ✅ Compatible — managed followers are skipped |
+| Enhanced Follower Framework (EFF) | ✅ Compatible — managed followers are skipped |
+| Vanilla followers | ✅ Protected — CurrentFollowerFaction is always checked |
+
+### Requirements
+
+- Skyrim Special Edition or Anniversary Edition (1.5.97 – 1.6.1170+)
 - [SKSE64](https://skse.silverlock.org/)
 - [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
 
-## Installation
-1. Install requirements.
-2. Build the `.dll` or download from releases.
-3. Place `NpcGhostFix.dll` in `Data/SKSE/Plugins/`.
+### Installation
 
-## Building
-This project uses **CMake** and **vcpkg** for dependency management.
+1. Install the requirements above.
+2. Place `NpcGhostFix.dll` into `Data/SKSE/Plugins/`.
+3. Optionally place `NpcGhostFix.ini` into `Data/SKSE/Plugins/` to customize settings.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/arifkulpu/Invisible-NPC-Fixer.git
-   ```
-2. Set up vcpkg and install dependencies:
-   ```bash
-   vcpkg install commonlibsse-ng
-   ```
-3. Generate project files:
-   ```bash
-   cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=[path-to-vcpkg]/scripts/buildsystems/vcpkg.cmake
-   ```
-4. Build:
-   ```bash
-   cmake --build build --config Release
-   ```
+---
 
-## License
-MIT License
+## Türkçe
+
+### Ne yapar?
+
+- Oyuncu çevresindeki NPC'leri birkaç saniyede bir tarar; 3D node'u render edilemeyen (hayalet NPC) aktörleri tespit eder.
+- Etkilenen NPC'leri NiNode görünürlük flag'ini sıfırlayarak (`SetAppCulled`) düzeltir. Bu işlem yalnızca render grafiğine dokunur; **aktörün envanterini veya kıyafetini asla değiştirmez.**
+- OStim, OStim NG, SexLab gibi animasyon sahnelerindeki aktörleri atlar; bu framework'lerle çakışma yaşanmaz.
+- Tüm takipçileri korur: vanilla takipçiler (`CurrentFollowerFaction`) ve Nether's Follower Framework (NFF), Amazing Follower Tweaks (AFT), Enhanced Follower Framework (EFF) tarafından yönetilen takipçiler.
+- Herhangi bir menü açıkken (envanter, sandık, alışveriş vb.) taramayı otomatik olarak duraklatır. Bu menüler sırasında motor NPC 3D modellerini geçici olarak bellekten kaldırdığından, o anda tarama yapılması yanlış pozitif sonuçlar üretir.
+- Tüm davranışlar `Data/SKSE/Plugins/NpcGhostFix.ini` üzerinden ayarlanabilir. INI dosyası olmadan mod varsayılan değerlerle çalışır.
+
+### Uyumluluk
+
+| Mod | Durum |
+|---|---|
+| OStim / OStim NG / OSex | ✅ Uyumlu — aktif sahnedeki aktörler atlanır |
+| SexLab Framework | ✅ Uyumlu — aktif sahnedeki aktörler atlanır |
+| Nether's Follower Framework (NFF) | ✅ Uyumlu — yönetilen takipçiler atlanır |
+| Amazing Follower Tweaks (AFT) | ✅ Uyumlu — yönetilen takipçiler atlanır |
+| Enhanced Follower Framework (EFF) | ✅ Uyumlu — yönetilen takipçiler atlanır |
+| Vanilla takipçiler | ✅ Korumalı — CurrentFollowerFaction her zaman kontrol edilir |
+
+### Gereksinimler
+
+- Skyrim Special Edition veya Anniversary Edition (1.5.97 – 1.6.1170+)
+- [SKSE64](https://skse.silverlock.org/)
+- [SKSE Eklentileri için Adres Kütüphanesi](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
+
+### Kurulum
+
+1. Yukarıdaki gereksinimleri kurun.
+2. `NpcGhostFix.dll` dosyasını `Data/SKSE/Plugins/` klasörüne kopyalayın.
+3. İsteğe bağlı: `NpcGhostFix.ini` dosyasını da aynı klasöre kopyalayarak ayarları özelleştirin.
+
+---
+
+## License / Lisans
+
+Copyright (c) 2026 Arif KULPU. All Rights Reserved. — Tüm Hakları Saklıdır.  
+See [LICENSE](LICENSE) for details.

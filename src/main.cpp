@@ -1,6 +1,7 @@
 #include <SKSE/SKSE.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include "VisibilityFixer.h"
+#include "Settings.h"
 
 using namespace std::string_literals;
 
@@ -9,17 +10,15 @@ namespace
     void InitializeLog()
     {
         auto path = SKSE::log::log_directory();
-        if (!path) {
-            return;
-        }
+        if (!path) return;
 
         *path /= SKSE::PluginDeclaration::GetSingleton()->GetName();
         *path += ".log";
 
         auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
-        auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+        auto log  = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
 
-        log->set_level(spdlog::level::info);
+        log->set_level(spdlog::level::trace);   // trace lets debug() calls through when enabled
         log->flush_on(spdlog::level::info);
 
         spdlog::set_default_logger(std::move(log));
@@ -30,8 +29,9 @@ namespace
     {
         switch (a_msg->type) {
         case SKSE::MessagingInterface::kDataLoaded:
+            // Install() also loads settings and detects mods after all ESPs are loaded
             VisibilityFixer::Install();
-            SKSE::log::info("VisibilityFixer installed after DataLoaded.");
+            SKSE::log::info("NpcGhostFix: VisibilityFixer installed (DataLoaded).");
             break;
         }
     }
@@ -48,6 +48,6 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse) {
         return false;
     }
 
-    SKSE::log::info("NpcGhostFix loaded.");
+    SKSE::log::info("NpcGhostFix loaded successfully.");
     return true;
 }
